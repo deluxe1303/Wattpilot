@@ -14,6 +14,8 @@ from homeassistant.const import (
     CONF_FRIENDLY_NAME,
     CONF_IP_ADDRESS,
     STATE_UNKNOWN,
+    UnitOfPower,
+    UnitOfEnergy,
 )
 
 from .const import (
@@ -107,9 +109,29 @@ class ChargerPlatformEntity(Entity):
 
 
     @property
+    def native_unit_of_measurement(self) -> str | None:
+        """Return the default unit_of_measurement of the entity."""
+        try: return UnitOfPower(self._unit_of_measurement)
+        except: pass
+        try: return UnitOfEnergy(self._unit_of_measurement)
+        except: pass
+        return None
+
+
+    @property
     def unit_of_measurement(self) -> str | None:
         """Return the unit_of_measurement of the entity."""
-        return self._unit_of_measurement
+        if self.native_unit_of_measurement is None:
+            return self._unit_of_measurement
+        return None
+
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the entity state within the native_unit_of_measurement."""
+        if self.native_unit_of_measurement is None:
+            return None
+        return self._state
 
 
     @property
